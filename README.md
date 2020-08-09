@@ -1,4 +1,6 @@
-# Fabric Example Mod
+# Bounding Box Minecraft Mod
+
+<img src="2020-08-09_18.07.50.png" data-canonical-src="2020-08-09_18.07.50.png" height="500" />
 
 ## Setup
 
