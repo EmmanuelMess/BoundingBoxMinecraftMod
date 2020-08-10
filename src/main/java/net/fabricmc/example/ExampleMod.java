@@ -1,39 +1,41 @@
 package net.fabricmc.example;
 
 import net.fabricmc.api.*;
-import net.fabricmc.fabric.api.client.keybinding.v1.*;
-import net.fabricmc.fabric.api.event.client.*;
+import net.fabricmc.fabric.api.client.rendering.v1.*;
 import net.minecraft.block.*;
 import net.minecraft.client.*;
-import net.minecraft.client.options.*;
+import net.minecraft.client.gui.*;
+import net.minecraft.client.util.math.*;
+import net.minecraft.entity.*;
 import net.minecraft.text.*;
-import net.minecraft.util.*;
 import net.minecraft.util.hit.*;
 import net.minecraft.util.math.*;
-import org.lwjgl.glfw.*;
+import net.minecraft.world.*;
 
 public class ExampleMod implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
-		KeyBinding binding1 = KeyBindingHelper.registerKeyBinding(
-				new KeyBinding(
-						"key.modid.capture",
-						GLFW.GLFW_KEY_R,
-						"key.category.all"
-				)
-		);
+		HudRenderCallback.EVENT.register(this::displayBoundingBox);
+	}
 
-		ClientTickCallback.EVENT.register(client -> {
-			while (binding1.wasPressed()) {
-				captureBoundingBox(client);
-			}
-		});
+	private void displayBoundingBox(MatrixStack matrixStack, float tickDelta) {
+		MinecraftClient client = MinecraftClient.getInstance();
+		//drawHollowFill(matrixStack, 5, 5, 100, 100, 5, 0xffff0000);
+
+		captureBoundingBox(client);
+	}
+
+	private void drawHollowFill(MatrixStack matrixStack, int x, int y, int height, int width, int stroke, int color) {
+		DrawableHelper.fill(matrixStack, x, y, x + width, y + stroke, color);
+		DrawableHelper.fill(matrixStack, x + width - stroke, y, x + width, y + height, color);
+		DrawableHelper.fill(matrixStack, x, y + height - stroke, x + width, y + height, color);
+		DrawableHelper.fill(matrixStack, x, y, x + stroke, y + height, color);
 	}
 
 	public static void captureBoundingBox(MinecraftClient client) {
 		HitResult hit = client.crosshairTarget;
 
-		client.player.sendMessage(new LiteralText("Bounding: ").append(getLabel(hit)), false);
+		client.player.sendMessage(new LiteralText("Bounding: ").append(getLabel(hit)), true);
 	}
 
 	private static Text getLabel(HitResult hit) {
@@ -59,5 +61,18 @@ public class ExampleMod implements ClientModInitializer {
 		BlockState blockState = MinecraftClient.getInstance().world.getBlockState(blockPos);
 		Block block = blockState.getBlock();
 		return block.getName();
+	}
+
+	private static HitResult rayTrace(Entity entity, double maxDistance, float tickDelta, boolean includeFluids) {
+		Vec3d vec3d = entity.getCameraPosVec(tickDelta);
+		Vec3d vec3d2 = entity.getRotationVec(tickDelta);
+		Vec3d vec3d3 = vec3d.add(vec3d2.x * maxDistance, vec3d2.y * maxDistance, vec3d2.z * maxDistance);
+		return entity.world.rayTrace(new RayTraceContext(
+				vec3d,
+				vec3d3,
+				RayTraceContext.ShapeType.OUTLINE,
+				includeFluids ? RayTraceContext.FluidHandling.ANY : RayTraceContext.FluidHandling.NONE,
+				entity
+		));
 	}
 }
