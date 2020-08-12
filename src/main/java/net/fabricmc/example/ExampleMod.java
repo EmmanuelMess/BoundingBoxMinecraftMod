@@ -43,31 +43,66 @@ public class ExampleMod implements ClientModInitializer {
 		Vec3d center = map((float) angleSize, vector, horizontalRotationAxis, verticalRotationAxis,
 				width/2, height/2, width, height);
 		HitResult hit = updateTargetedEntity(client, tickDelta, center);
+
+		if (hit.getType() == HitResult.Type.MISS) {
+			return;
+		}
+
 		int minX = width;
 		int maxX = 0;
 		int minY = height;
 		int maxY = 0;
 
-		for(int x = 0; x < width; x++) {
-			for(int y = 0; y < height; y++) {
-				HitResult nextHit = updateTargetedEntity(client, tickDelta, map((float) angleSize, vector,
-						horizontalRotationAxis, verticalRotationAxis, x, y, width, height));
-				if(nextHit.getPos().isInRange(hit.getPos(), 1)) {
-					if(minX > x) minX = x;
-					if(minY > y) minY = y;
-					if(maxX < x) maxX = x;
-					if(maxY < y) maxY = y;
+		for(int y = 0; y < height; y++) {
+			for(int x = 0; x < width; x++) {
+				Vec3d direction = map(
+						(float) angleSize,
+						vector,
+						horizontalRotationAxis,
+						verticalRotationAxis,
+						x,
+						y,
+						width,
+						height
+				);
+				HitResult nextHit = updateTargetedEntity(client, tickDelta, direction);
+
+				if(nextHit.getType() == HitResult.Type.MISS) {
+					continue;
 				}
+
+				if(nextHit.getType() != hit.getType()) {
+					continue;
+				}
+
+				if (nextHit.getType() == HitResult.Type.BLOCK) {
+					if(!((BlockHitResult) nextHit).getBlockPos().equals(((BlockHitResult) hit).getBlockPos())) {
+						continue;
+					}
+				} else if(nextHit.getType() == HitResult.Type.ENTITY) {
+					if(!((EntityHitResult) nextHit).getEntity().equals(((EntityHitResult) hit).getEntity())) {
+						continue;
+					}
+				}
+
+				if(minX > x) minX = x;
+				if(minY > y) minY = y;
+				if(maxX < x) maxX = x;
+				if(maxY < y) maxY = y;
 			}
 		}
 
-		drawHollowFill(matrixStack, minX, minY, maxX - minX, maxY - minY, 5, 0xffff0000);
-		client.player.sendMessage(new LiteralText("Bounding: ").append(getLabel(hit)), true);
+
+		drawHollowFill(matrixStack, minX, minY, maxX - minX, maxY - minY, 2, 0xffff0000);
+		LiteralText text = new LiteralText("Bounding " + minX + " " + minY + " " + width + " " + height + ": ");
+		client.player.sendMessage(text.append(getLabel(hit)), true);
 	}
 
-	private static void drawHollowFill(MatrixStack matrixStack, int x, int y, int height, int width, int stroke, int color) {
+	private static void drawHollowFill(MatrixStack matrixStack, int x, int y, int width, int height, int stroke, int color) {
 		matrixStack.push();
-		matrixStack.translate(x, y, 0);
+		matrixStack.translate(x-stroke, y-stroke, 0);
+		width += stroke *2;
+		height += stroke *2;
 		DrawableHelper.fill(matrixStack, 0, 0, width, stroke, color);
 		DrawableHelper.fill(matrixStack, width - stroke, 0, width, height, color);
 		DrawableHelper.fill(matrixStack, 0, height - stroke, width, height, color);
