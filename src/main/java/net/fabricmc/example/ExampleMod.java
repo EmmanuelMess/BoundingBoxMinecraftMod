@@ -35,9 +35,7 @@ public class ExampleMod implements ClientModInitializer {
 		horizontalRotationAxis.cross(verticalRotationAxis);
 		horizontalRotationAxis.normalize();
 
-		Vec3d center = map((float) angleSize, cameraDirection, horizontalRotationAxis, verticalRotationAxis,
-				width/2, height/2, width, height);//TODO use client.crosshairTarget
-		HitResult hit = rayTraceInDirection(client, tickDelta, center);
+		HitResult hit = client.crosshairTarget;
 
 		if (hit.getType() == HitResult.Type.MISS) {
 			return;
@@ -61,6 +59,10 @@ public class ExampleMod implements ClientModInitializer {
 						height
 				);
 				HitResult nextHit = rayTraceInDirection(client, tickDelta, direction);//TODO make less expensive
+
+				if(nextHit == null) {
+					continue;
+				}
 
 				if(nextHit.getType() == HitResult.Type.MISS) {
 					continue;
@@ -167,14 +169,14 @@ public class ExampleMod implements ClientModInitializer {
 			extendedReach = target.getPos().squaredDistanceTo(cameraPos);
 		}
 
-		Vec3d vec3d3 = entity.getCameraPosVec(tickDelta).add(direction.multiply(reachDistance));
+		Vec3d vec3d3 = cameraPos.add(direction.multiply(reachDistance));
 		Box box = entity
 				.getBoundingBox()
 				.stretch(entity.getRotationVec(1.0F).multiply(reachDistance))
 				.expand(1.0D, 1.0D, 1.0D);
 		EntityHitResult entityHitResult = ProjectileUtil.rayTrace(
 				entity,
-				entity.getCameraPosVec(tickDelta),
+				cameraPos,
 				vec3d3,
 				box,
 				(entityx) -> !entityx.isSpectator() && entityx.collides(),
@@ -189,7 +191,7 @@ public class ExampleMod implements ClientModInitializer {
 		Vec3d vec3d4 = entityHitResult.getPos();
 		double g = cameraPos.squaredDistanceTo(vec3d4);
 		if (tooFar && g > 9.0D) {
-			target = BlockHitResult.createMissed(vec3d4, Direction.getFacing(direction.x, direction.y, direction.z), new BlockPos(vec3d4));
+			return null;
 		} else if (g < extendedReach || target == null) {
 			target = entityHitResult;
 			if (entity2 instanceof LivingEntity || entity2 instanceof ItemFrameEntity) {
