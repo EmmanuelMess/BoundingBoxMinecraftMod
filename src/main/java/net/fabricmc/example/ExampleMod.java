@@ -32,15 +32,18 @@ public class ExampleMod implements ClientModInitializer {
 	public static void captureBoundingBox(MatrixStack matrixStack, MinecraftClient client, float tickDelta) {
 		int width = client.getWindow().getScaledWidth();
 		int height = client.getWindow().getScaledHeight();
-		Vec3d vector = client.cameraEntity.getRotationVec(tickDelta);
+		Vec3d cameraDirection = client.cameraEntity.getRotationVec(tickDelta);
 		double fov = client.options.fov;
 		double angleSize = fov/height;
-		Vector3f verticalRotationAxis = new Vector3f(vector);
+		//TODO fix looking down
+		Vector3f verticalRotationAxis = new Vector3f(cameraDirection);
 		verticalRotationAxis.cross(Vector3f.POSITIVE_Y);
-		Vector3f horizontalRotationAxis = new Vector3f(vector);
+		verticalRotationAxis.normalize();
+		Vector3f horizontalRotationAxis = new Vector3f(cameraDirection);
 		horizontalRotationAxis.cross(verticalRotationAxis);
+		horizontalRotationAxis.normalize();
 
-		Vec3d center = map((float) angleSize, vector, horizontalRotationAxis, verticalRotationAxis,
+		Vec3d center = map((float) angleSize, cameraDirection, horizontalRotationAxis, verticalRotationAxis,
 				width/2, height/2, width, height);
 		HitResult hit = updateTargetedEntity(client, tickDelta, center);
 
@@ -57,7 +60,7 @@ public class ExampleMod implements ClientModInitializer {
 			for(int x = 0; x < width; x++) {
 				Vec3d direction = map(
 						(float) angleSize,
-						vector,
+						cameraDirection,
 						horizontalRotationAxis,
 						verticalRotationAxis,
 						x,
