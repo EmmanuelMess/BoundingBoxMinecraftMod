@@ -17,15 +17,11 @@ import net.minecraft.world.*;
 public class ExampleMod implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
-		HudRenderCallback.EVENT.register(this::displayBoundingBox);
+		HudRenderCallback.EVENT.register(ExampleMod::displayBoundingBox);
 	}
 
-	private void displayBoundingBox(MatrixStack matrixStack, float tickDelta) {
+	public static void displayBoundingBox(MatrixStack matrixStack, float tickDelta) {
 		MinecraftClient client = MinecraftClient.getInstance();
-		captureBoundingBox(matrixStack, client, tickDelta);
-	}
-
-	public static void captureBoundingBox(MatrixStack matrixStack, MinecraftClient client, float tickDelta) {
 		int width = client.getWindow().getScaledWidth();
 		int height = client.getWindow().getScaledHeight();
 		Vec3d cameraDirection = client.cameraEntity.getRotationVec(tickDelta);
