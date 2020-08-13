@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.*;
 import net.minecraft.block.*;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.*;
-import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.decoration.*;
@@ -14,11 +13,8 @@ import net.minecraft.text.*;
 import net.minecraft.util.hit.*;
 import net.minecraft.util.math.*;
 import net.minecraft.world.*;
-import org.lwjgl.system.*;
 
 public class ExampleMod implements ClientModInitializer {
-	public static FrustumPos currentFrustum;
-
 	@Override
 	public void onInitializeClient() {
 		HudRenderCallback.EVENT.register(this::displayBoundingBox);
