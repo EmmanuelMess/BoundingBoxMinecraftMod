@@ -20,7 +20,7 @@ public class ExampleMod implements ClientModInitializer {
 		HudRenderCallback.EVENT.register(ExampleMod::displayBoundingBox);
 	}
 
-	public static void displayBoundingBox(MatrixStack matrixStack, float tickDelta) {
+	private static void displayBoundingBox(MatrixStack matrixStack, float tickDelta) {
 		MinecraftClient client = MinecraftClient.getInstance();
 		int width = client.getWindow().getScaledWidth();
 		int height = client.getWindow().getScaledHeight();
@@ -36,8 +36,8 @@ public class ExampleMod implements ClientModInitializer {
 		horizontalRotationAxis.normalize();
 
 		Vec3d center = map((float) angleSize, cameraDirection, horizontalRotationAxis, verticalRotationAxis,
-				width/2, height/2, width, height);
-		HitResult hit = updateTargetedEntity(client, tickDelta, center);
+				width/2, height/2, width, height);//TODO use client.crosshairTarget
+		HitResult hit = rayTraceInDirection(client, tickDelta, center);
 
 		if (hit.getType() == HitResult.Type.MISS) {
 			return;
@@ -60,7 +60,7 @@ public class ExampleMod implements ClientModInitializer {
 						width,
 						height
 				);
-				HitResult nextHit = updateTargetedEntity(client, tickDelta, direction);
+				HitResult nextHit = rayTraceInDirection(client, tickDelta, direction);//TODO make less expensive
 
 				if(nextHit.getType() == HitResult.Type.MISS) {
 					continue;
@@ -141,8 +141,7 @@ public class ExampleMod implements ClientModInitializer {
 		return new Vec3d(temp2);
 	}
 
-
-	public static HitResult updateTargetedEntity(MinecraftClient client, float tickDelta, Vec3d direction) {
+	private static HitResult rayTraceInDirection(MinecraftClient client, float tickDelta, Vec3d direction) {
 		Entity entity = client.getCameraEntity();
 		if (entity == null || client.world == null) {
 			return null;
