@@ -1,6 +1,6 @@
 # Bounding Box Minecraft Mod
 
-<img src="2020-08-09_18.07.50.png" data-canonical-src="2020-08-09_18.07.50.png" height="500" />
+<img src="screenshot.png" data-canonical-src="screenshot.png" height="500" />
 
 ## Setup
 
