@@ -51,8 +51,12 @@ public class ExampleMod implements ClientModInitializer {
 		int minY = height;
 		int maxY = 0;
 
-		for(int y = 0; y < height; y ++) {
-			for(int x = 0; x < width; x++) {
+		for(int y = 0; y < height; y +=3) {
+			for(int x = 0; x < width; x+=4) {
+				if(minX < x && x < maxX && minY < y && y < maxY) {
+					continue;
+				}
+
 				Vec3d direction = map(
 						(float) angleSize,
 						cameraDirection,
