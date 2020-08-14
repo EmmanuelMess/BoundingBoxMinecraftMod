@@ -20,7 +20,23 @@ public class ExampleMod implements ClientModInitializer {
 		HudRenderCallback.EVENT.register(ExampleMod::displayBoundingBox);
 	}
 
+	private static long lastCalculationTime = 0;
+	private static boolean lastCalculationExists = false;
+	private static int lastCalculationMinX = 0;
+	private static int lastCalculationMinY = 0;
+	private static int lastCalculationWidth = 0;
+	private static int lastCalculationHeight = 0;
+
 	private static void displayBoundingBox(MatrixStack matrixStack, float tickDelta) {
+		long currentTime = System.currentTimeMillis();
+		if(lastCalculationExists && currentTime - lastCalculationTime < 1000/45) {
+			drawHollowFill(matrixStack, lastCalculationMinX, lastCalculationMinY,
+					lastCalculationWidth, lastCalculationHeight, 2, 0xffff0000);
+			return;
+		}
+
+		lastCalculationTime = currentTime;
+
 		MinecraftClient client = MinecraftClient.getInstance();
 		int width = client.getWindow().getScaledWidth();
 		int height = client.getWindow().getScaledHeight();
@@ -30,6 +46,7 @@ public class ExampleMod implements ClientModInitializer {
 		Vector3f verticalRotationAxis = new Vector3f(cameraDirection);
 		verticalRotationAxis.cross(Vector3f.POSITIVE_Y);
 		if(!verticalRotationAxis.normalize()) {
+			lastCalculationExists = false;
 			return;
 		}
 
@@ -43,6 +60,7 @@ public class ExampleMod implements ClientModInitializer {
 		HitResult hit = client.crosshairTarget;
 
 		if (hit.getType() == HitResult.Type.MISS) {
+			lastCalculationExists = false;
 			return;
 		}
 
@@ -51,8 +69,8 @@ public class ExampleMod implements ClientModInitializer {
 		int minY = height;
 		int maxY = 0;
 
-		for(int y = 0; y < height; y +=3) {
-			for(int x = 0; x < width; x+=4) {
+		for(int y = 0; y < height; y +=2) {
+			for(int x = 0; x < width; x+=2) {
 				if(minX < x && x < maxX && minY < y && y < maxY) {
 					continue;
 				}
@@ -98,6 +116,12 @@ public class ExampleMod implements ClientModInitializer {
 			}
 		}
 
+
+		lastCalculationExists = true;
+		lastCalculationMinX = minX;
+		lastCalculationMinY = minY;
+		lastCalculationWidth = maxX - minX;
+		lastCalculationHeight = maxY - minY;
 
 		drawHollowFill(matrixStack, minX, minY, maxX - minX, maxY - minY, 2, 0xffff0000);
 		LiteralText text = new LiteralText("Bounding " + minX + " " + minY + " " + width + " " + height + ": ");
