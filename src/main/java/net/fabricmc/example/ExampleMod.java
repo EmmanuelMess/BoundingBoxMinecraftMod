@@ -182,18 +182,11 @@ public class ExampleMod implements ClientModInitializer {
 			return null;
 		}
 
-		double reachDistance = client.interactionManager.getReachDistance();
+		double reachDistance = 5.0F;
 		HitResult target = rayTrace(entity, reachDistance, tickDelta, false, direction);
 		boolean tooFar = false;
-		double extendedReach = reachDistance;
-		if (client.interactionManager.hasExtendedReach()) {
-			extendedReach = 6.0D;
-			reachDistance = extendedReach;
-		} else {
-			if (reachDistance > 3.0D) {
-				tooFar = true;
-			}
-		}
+		double extendedReach = 6.0D;
+		reachDistance = extendedReach;
 
 		Vec3d cameraPos = entity.getCameraPosVec(tickDelta);
 
@@ -221,11 +214,8 @@ public class ExampleMod implements ClientModInitializer {
 		}
 
 		Entity entity2 = entityHitResult.getEntity();
-		Vec3d vec3d4 = entityHitResult.getPos();
-		double g = cameraPos.squaredDistanceTo(vec3d4);
-		if (tooFar && g > 9.0D) {
-			return null;
-		} else if (g < extendedReach || target == null) {
+		Vec3d hitPos = entityHitResult.getPos();
+		if (cameraPos.squaredDistanceTo(hitPos) < extendedReach || target == null) {
 			target = entityHitResult;
 			if (entity2 instanceof LivingEntity || entity2 instanceof ItemFrameEntity) {
 				client.targetedEntity = entity2;
