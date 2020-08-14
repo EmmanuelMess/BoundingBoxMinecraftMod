@@ -20,6 +20,8 @@ public class ExampleMod implements ClientModInitializer {
 		HudRenderCallback.EVENT.register(ExampleMod::displayBoundingBox);
 	}
 
+	private static final Vector3f ONE = new Vector3f(1, 1, 1);
+
 	private static void displayBoundingBox(MatrixStack matrixStack, float tickDelta) {
 		MinecraftClient client = MinecraftClient.getInstance();
 		int width = client.getWindow().getScaledWidth();
@@ -27,10 +29,14 @@ public class ExampleMod implements ClientModInitializer {
 		Vec3d cameraDirection = client.cameraEntity.getRotationVec(tickDelta);
 		double fov = client.options.fov;
 		double angleSize = fov/height;
-		//TODO fix looking down
 		Vector3f verticalRotationAxis = new Vector3f(cameraDirection);
 		verticalRotationAxis.cross(Vector3f.POSITIVE_Y);
 		verticalRotationAxis.normalize();
+
+		if(verticalRotationAxis.dot(ONE) == 0) {
+			return;
+		}
+
 		Vector3f horizontalRotationAxis = new Vector3f(cameraDirection);
 		horizontalRotationAxis.cross(verticalRotationAxis);
 		horizontalRotationAxis.normalize();
@@ -46,7 +52,7 @@ public class ExampleMod implements ClientModInitializer {
 		int minY = height;
 		int maxY = 0;
 
-		for(int y = 0; y < height; y++) {
+		for(int y = 0; y < height; y ++) {
 			for(int x = 0; x < width; x++) {
 				Vec3d direction = map(
 						(float) angleSize,
