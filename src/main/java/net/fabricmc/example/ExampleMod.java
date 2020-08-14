@@ -37,6 +37,9 @@ public class ExampleMod implements ClientModInitializer {
 		horizontalRotationAxis.cross(verticalRotationAxis);
 		horizontalRotationAxis.normalize();
 
+		verticalRotationAxis = new Vector3f(cameraDirection);
+		verticalRotationAxis.cross(horizontalRotationAxis);
+
 		HitResult hit = client.crosshairTarget;
 
 		if (hit.getType() == HitResult.Type.MISS) {
