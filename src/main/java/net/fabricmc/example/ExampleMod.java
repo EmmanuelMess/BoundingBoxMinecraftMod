@@ -20,8 +20,6 @@ public class ExampleMod implements ClientModInitializer {
 		HudRenderCallback.EVENT.register(ExampleMod::displayBoundingBox);
 	}
 
-	private static final Vector3f ONE = new Vector3f(1, 1, 1);
-
 	private static void displayBoundingBox(MatrixStack matrixStack, float tickDelta) {
 		MinecraftClient client = MinecraftClient.getInstance();
 		int width = client.getWindow().getScaledWidth();
@@ -31,9 +29,7 @@ public class ExampleMod implements ClientModInitializer {
 		double angleSize = fov/height;
 		Vector3f verticalRotationAxis = new Vector3f(cameraDirection);
 		verticalRotationAxis.cross(Vector3f.POSITIVE_Y);
-		verticalRotationAxis.normalize();
-
-		if(verticalRotationAxis.dot(ONE) == 0) {
+		if(!verticalRotationAxis.normalize()) {
 			return;
 		}
 
@@ -140,8 +136,8 @@ public class ExampleMod implements ClientModInitializer {
 
 	private static Vec3d map(float anglePerPixel, Vec3d center, Vector3f horizontalRotationAxis,
 							 Vector3f verticalRotationAxis, int x, int y, int width, int height) {
-		float horizontalRotation = (x - width/2) * anglePerPixel;
-		float verticalRotation = (y - height/2) * anglePerPixel;
+		float horizontalRotation = (x - width/2f) * anglePerPixel;
+		float verticalRotation = (y - height/2f) * anglePerPixel;
 
 		final Vector3f temp2 = new Vector3f(center);
 		temp2.rotate(verticalRotationAxis.getDegreesQuaternion(verticalRotation));
